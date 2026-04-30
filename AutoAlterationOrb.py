@@ -187,7 +187,7 @@ tk.Label(root, text="Item Regex:").pack(
 regex_entry = tk.Entry(root, width=85)
 regex_entry.pack(padx=10, pady=5)
 
-tk.Label(root, text="Safety limit:").pack(anchor="w", padx=10)
+tk.Label(root, text="Max Attempt:").pack(anchor="w", padx=10)
 
 limit_entry = tk.Entry(root, width=20)
 limit_entry.insert(0, "40")
@@ -204,7 +204,7 @@ tk.Checkbutton(
     variable=ctrl_click_var
 ).pack(side="left")
 
-tk.Label(augment_frame, text="Alternative Currency shortcut:").pack(side="left", padx=(15, 5))
+tk.Label(augment_frame, text="In-Game Alternative Currency shortcut:").pack(side="left", padx=(17, 5))
 
 augment_key_entry = tk.Entry(augment_frame, width=10)
 augment_key_entry.insert(0, "alt")
@@ -227,7 +227,7 @@ speed_slider.pack(anchor="w", padx=10, pady=5)
 #------------------------------------------
 tk.Label(
     root,
-    text="Hotkeys: F6 Start | F7 Stop "
+    text=" F6 Start | F7 Stop "
 ).pack(pady=5)
 
 output_box = scrolledtext.ScrolledText(root, width=85, height=20)
