@@ -23,10 +23,10 @@ python AutoAlterationOrb.py
 ```
 
 2. Key in item regex ( same format in POE, Supports all languages) and set up accordingly
-[alt text](image-1.png)
+[alt text](Demo.png)
 
 3. Rightclick Orb of Alteration and hover on the item
-![alt text](image.png)
+![alt text](Hoverdemo.png)
 
 4. Press F6 to start until getting the desired modifier
 
