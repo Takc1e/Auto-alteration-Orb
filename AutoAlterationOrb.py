@@ -104,9 +104,14 @@ def run_script():
             time.sleep(CLICK_DELAY)
 
             if ctrl_click_enabled:
-                pyautogui.keyDown("ctrl")
-                pyautogui.click()
-                pyautogui.keyUp("ctrl")
+                    time.sleep(0.02)  # 👈 slight delay before augment
+
+                    try:
+                        pyautogui.keyDown("ctrl")
+                        time.sleep(0.005)
+                        pyautogui.click()
+                    finally:
+                        pyautogui.keyUp("ctrl")
 
             attempts += 1
             time.sleep(ITERATION_DELAY)
@@ -160,6 +165,7 @@ log("Ready. Enter regex, set mode, then use Shift+= in game.")
 
 keyboard.add_hotkey("shift+=", start_thread)
 keyboard.add_hotkey("shift+-", stop_script)
-keyboard.add_hotkey("esc", stop_script)
+keyboard.add_hotkey("esc", stop_script, suppress=False)
+keyboard.add_hotkey("shift+esc", stop_script, suppress=False)
 
 root.mainloop()
