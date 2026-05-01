@@ -19,11 +19,11 @@ pip install pyautogui keyboard pyperclip
 # Useage 
 1. Run the script:
 ```bash
-python AutoAlterationOrb.py
+python OrbOfAutomation.py
 ```
 
 2. Key in item regex ( same format in POE, Supports all languages) and set up accordingly
-![alt text](Demo.png)
+![alt text](Demo_item.png)
 
 3. Rightclick Orb of Alteration and hover on the item
 ![alt text](Hoverdemo.png)
@@ -37,7 +37,12 @@ python AutoAlterationOrb.py
 - Adjust speed if rolls become unstable     
 
 --------------------------------------------------
+# Map roller (EN/简中/繁中)
+1. Generate your regex (clean,unwanted mods only)
+2. Key in regex and target Quantities
+3. Right click chaos and hover on map, F6 to reroll
+![alt text](Demo_map.png)
 
 # Disclaimer
 
-Use at your own risk.
+Not sure if GGG can detect such "unusual" currency spamming. Use at your own risk.
