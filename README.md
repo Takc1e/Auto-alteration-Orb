@@ -1,4 +1,4 @@
-﻿# Auto-alteration-Orb
+﻿# Orb of Automation
 Orb of Alteration automation tool for Path of Exile 1  
 Reads item data from the clipboard (Ctrl + C) instead of game files which is not against GGG T&C :)   
 
