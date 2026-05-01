@@ -21,6 +21,7 @@ pip install pyautogui keyboard pyperclip
 ```bash
 python OrbOfAutomation.py
 ```
+or simply run Orb of Automation.exe
 
 2. Key in item regex ( same format in POE, Supports all languages) and set up accordingly
 ![alt text](Demo_item.png)
