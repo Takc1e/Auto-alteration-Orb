@@ -41,7 +41,7 @@ Orb of Automation.exe
 
 --------------------------------------------------
 # Map roller (EN/简中/繁中)
-1. Generate your regex (clean,unwanted mods only)
+1. Generate your regex from thirdparty websites(clean,unwanted mods only)
 2. Key in regex and target Quantities
 3. Right click chaos and hover on map, F6 to reroll
 ![alt text](Demo_map.png)
