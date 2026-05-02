@@ -1,5 +1,9 @@
 import re
 
+def safe_user_regex(pattern: str) -> str:
+    # Escape standalone +
+    pattern = re.sub(r'(?<!\\)\+', r'\\+', pattern)
+    return pattern
 
 def clean_poe_regex(text: str) -> str:
     """
@@ -32,6 +36,8 @@ def compile_regex(pattern: str, label: str = "regex"):
 
     if not pattern:
         return None
+    
+    pattern = safe_user_regex(pattern)
 
     try:
         return re.compile(pattern, re.IGNORECASE)
