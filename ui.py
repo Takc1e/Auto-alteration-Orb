@@ -9,7 +9,7 @@ from roller import Roller
 class AutoAlterationOrbApp:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("AutoAlterationOrb")
+        self.root.title("Orb of Automation")
         self.root.geometry("750x700")
 
         self.roller = Roller(self.log)
