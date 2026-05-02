@@ -5,7 +5,7 @@ Reads item data from the clipboard (Ctrl + C) instead of game files which is not
 # Useage 
 1. Run **Orb of Automation.exe** as **Administrator** (Important)
 
-  *Alternatively,if using python 3.8+,Installnstall dependencies:*
+  *Alternatively, if using python 3.8+, install dependencies:*
 ```bash
 pip install pyautogui keyboard pyperclip
 ```
