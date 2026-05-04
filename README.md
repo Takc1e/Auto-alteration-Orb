@@ -18,7 +18,7 @@ python OrbOfAutomation.py
 ![alt text](Demo_item.png)
 
 3. Rightclick Orb of Alteration and hover on the item
-![alt text](Hoverdemo.png)
+
 
 4. Press F6 to start until getting the desired modifier
 
@@ -35,6 +35,13 @@ python OrbOfAutomation.py
 3. Right click chaos and hover on map, F6 to reroll
 ![alt text](Demo_map.png)
 
+--------------------------------------------------
+# Cluster Jewel auto crafting
+1. Key in all the targets modifiers
+2. Key in the fractured mod (if any)
+3. Select Auto fill in currency tab , hover the mouse onto orb of transmutation after 3 seconds
+4. Fill in configurationand, go back to the game and simply press F6 to start.
+![alt text](Cluster_demo.png)
 # Disclaimer
 
 Not sure if GGG can detect such "unusual" currency spamming. Use at your own risk.
