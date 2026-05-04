@@ -34,6 +34,73 @@ def extract_item_name(text: str) -> str:
     return ""
 
 
+def parse_item_mod_lines(text: str) -> list:
+    """
+    Best-effort parser for explicit copied item mods.
+
+    It ignores item metadata, requirements, enchant lines, and reminder text.
+    Cluster jewel explicit mods are copied as plain stat lines between
+    separator blocks, so preserving the original line is more useful than
+    trying to classify prefix/suffix here.
+    """
+    ignored_prefixes = (
+        "物品类别",
+        "稀 有 度",
+        "需求",
+        "等级",
+        "物品等级",
+        "Item Class",
+        "Rarity",
+        "Requirements",
+        "Level",
+        "Item Level",
+    )
+    ignored_exact = {
+        "--------",
+        "分裂之物",
+        "Fractured Item",
+    }
+    description_markers = (
+        "放入天赋树",
+        "可以右键点击",
+        "Place into an allocated",
+        "Right click to remove",
+    )
+
+    item_name = extract_item_name(text)
+    mod_lines = []
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+
+        if not line:
+            continue
+
+        if line == item_name or line in ignored_exact:
+            continue
+
+        if line.startswith(ignored_prefixes):
+            continue
+
+        if any(marker in line for marker in description_markers):
+            continue
+
+        if "(enchant)" in line.lower():
+            continue
+
+        looks_like_mod = (
+            "+" in line
+            or "%" in line
+            or "(fractured)" in line.lower()
+            or re.search(r"\d", line)
+        )
+
+        if looks_like_mod:
+            mod_lines.append(line)
+
+    return mod_lines
+
+
 def extract_value(pattern: str, text: str) -> int:
     match = re.search(pattern, text, re.IGNORECASE)
     return int(match.group(1)) if match else 0

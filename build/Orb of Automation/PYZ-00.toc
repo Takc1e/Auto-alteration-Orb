@@ -682,6 +682,7 @@
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.9_3.9.3568.0_x64__qbz5n2kfra8p0\\lib\\http\\server.py',
    'PYMODULE'),
+  ('i18n', 'D:\\AAO\\i18n.py', 'PYMODULE'),
   ('importlib',
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.9_3.9.3568.0_x64__qbz5n2kfra8p0\\lib\\importlib\\__init__.py',
