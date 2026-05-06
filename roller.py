@@ -90,6 +90,24 @@ class Roller:
             finally:
                 pyautogui.keyUp(shortcut_key)
 
+    def click_map_currency(self, currency_mode: str, shortcut_key: str, delays: dict):
+        if currency_mode == "alch_scour":
+            self.log("Using Orb of Scouring, then Orb of Alchemy.")
+            try:
+                pyautogui.keyDown(shortcut_key)
+                time.sleep(delays["shortcut_hold"])
+                pyautogui.click()
+                time.sleep(delays["click"])
+            finally:
+                pyautogui.keyUp(shortcut_key)
+
+            time.sleep(delays["augment"])
+            pyautogui.click()
+            time.sleep(delays["click"])
+            return
+
+        self.click_currency(currency_mode == "extra", shortcut_key, delays)
+
     def click_currency_action(
         self,
         action_name: str,
@@ -262,6 +280,7 @@ class Roller:
         safety_limit = settings.get("max_attempts", 40)
         speed = settings.get("speed", 1.0)
         use_extra_currency = settings.get("use_extra_currency", False)
+        currency_mode = settings.get("currency_mode", "extra" if use_extra_currency else "single")
         shortcut_key = settings.get("shortcut_key", "alt").strip().lower() or "alt"
 
         delays = self.get_delays(speed)
@@ -323,7 +342,10 @@ class Roller:
                             f"Div {stats['divination']}"
                         )
 
-                self.click_currency(use_extra_currency, shortcut_key, delays)
+                if mode == "map":
+                    self.click_map_currency(currency_mode, shortcut_key, delays)
+                else:
+                    self.click_currency(use_extra_currency, shortcut_key, delays)
 
                 attempts += 1
                 time.sleep(delays["iteration"])
@@ -395,6 +417,7 @@ class Roller:
         speed = settings.get("speed", 1.0)
         use_augment = settings.get("use_extra_currency", False)
         protected_target_floor = 1 if settings.get("is_fractured") else 0
+        stop_target_count = 3 if settings.get("stop_at_three_targets") else 4
         delays = self.get_delays(speed)
 
         attempts = 0
@@ -458,8 +481,10 @@ class Roller:
                 if unwanted_mods and stage != "alter":
                     self.log("Unwanted mods: " + " | ".join(unwanted_mods[:3]))
 
-                if target_count >= 4:
-                    self.log(f"Cluster craft complete: {item_name}")
+                if target_count >= stop_target_count:
+                    self.log(
+                        f"Cluster craft complete at {target_count}/4 targets: {item_name}"
+                    )
                     break
 
                 if stage == "alter":
@@ -533,8 +558,10 @@ class Roller:
                         stage = "check_exalt_annul"
 
                 elif stage == "check_exalt":
-                    if target_count >= 4:
-                        self.log(f"Cluster craft complete: {item_name}")
+                    if target_count >= stop_target_count:
+                        self.log(
+                            f"Cluster craft complete at {target_count}/4 targets: {item_name}"
+                        )
                         break
 
                     added_targets = set(matched_targets) - target_matches_before_currency

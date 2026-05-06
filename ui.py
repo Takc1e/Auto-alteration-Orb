@@ -10,18 +10,17 @@ from regex_utils import compile_regex
 from roller import Roller
 
 
-CURRENCY_TAB_PRESET = {
-    # Anchor is the Orb of Transmutation slot center.
-    # Values are pixel offsets from that anchor. If the currency tab changes,
-    # tune these offsets and use Show Captures to verify.
-    "transmute": (0, 0),
-    "alteration": (84, 0),
-    "augment": (252, 84),
-    "regal": (574, 0),
-    "scour": (574, 184),
-    "exalt": (376, 0),
-    "annul": (168, 0),
-    "item": (420, 282),
+CURRENCY_BOX_PRESET = {
+    # Normalized centers inside the whole visible currency stash tab.
+    # Capture the outer top-left and bottom-right corners of the stash panel.
+    "transmute": (0.060, 0.216),
+    "alteration": (0.150, 0.216),
+    "annul": (0.240, 0.216),
+    "augment": (0.329, 0.306),
+    "exalt": (0.456, 0.216),
+    "regal": (0.670, 0.216),
+    "scour": (0.670, 0.417),
+    "item": (0.497, 0.523),
 }
 
 
@@ -29,11 +28,12 @@ class AutoAlterationOrbApp:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Orb of Automation")
-        self.root.geometry("1280x1000")
-        self.root.minsize(1120, 920)
+        self.root.geometry("1280x1100")
+        self.root.minsize(1120, 980)
 
         self.roller = Roller(self.log)
         self.captured_positions = {}
+        self.currency_box = {}
         self.language = "en"
         self.i18n_widgets = []
         self.i18n_label_frames = []
@@ -119,23 +119,49 @@ class AutoAlterationOrbApp:
         self.log(f"Captured {key}: {position.x}, {position.y}")
         self.show_capture_overlay({key: self.captured_positions[key]}, duration_ms=1500)
 
-    def capture_currency_tab_anchor(self):
-        self.log("Move your mouse to Orb of Transmutation. Auto fill in 3 seconds.")
-        self.root.after(3000, self.finish_capture_currency_tab_anchor)
+    def capture_currency_box_corner(self, corner: str):
+        label = self.tr("currency_box_top_left") if corner == "top_left" else self.tr("currency_box_bottom_right")
+        self.log(f"Move your mouse to {label}. Capturing in 3 seconds.")
+        self.root.after(3000, lambda: self.finish_capture_currency_box_corner(corner))
 
-    def finish_capture_currency_tab_anchor(self):
+    def finish_capture_currency_box_corner(self, corner: str):
         position = pyautogui.position()
-        anchor = (position.x, position.y)
-        self.captured_positions["currency_anchor"] = anchor
-        self.log(f"Captured currency tab anchor: {anchor[0]}, {anchor[1]}")
+        point = (position.x, position.y)
+        self.currency_box[corner] = point
+        self.captured_positions[f"currency_box_{corner}"] = point
+        self.log(f"Captured currency box {corner}: {point[0]}, {point[1]}")
 
-        filled_positions = {}
+        if len(self.currency_box) == 2:
+            self.auto_fill_from_currency_box()
+        else:
+            self.show_capture_overlay({f"currency_box_{corner}": point}, duration_ms=1500)
 
-        for key, (offset_x, offset_y) in CURRENCY_TAB_PRESET.items():
-            filled_positions[key] = (
-                anchor[0] + offset_x,
-                anchor[1] + offset_y,
+    def auto_fill_from_currency_box(self):
+        top_left = self.currency_box.get("top_left")
+        bottom_right = self.currency_box.get("bottom_right")
+
+        if not top_left or not bottom_right:
+            self.log("Capture currency box top-left and bottom-right first.")
+            return
+
+        left = min(top_left[0], bottom_right[0])
+        right = max(top_left[0], bottom_right[0])
+        top = min(top_left[1], bottom_right[1])
+        bottom = max(top_left[1], bottom_right[1])
+        width = right - left
+        height = bottom - top
+
+        if width < 200 or height < 200:
+            self.log("Currency box is too small. Capture the whole visible currency stash tab.")
+            return
+
+        filled_positions = {
+            key: (
+                int(round(left + width * normalized_x)),
+                int(round(top + height * normalized_y)),
             )
+            for key, (normalized_x, normalized_y) in CURRENCY_BOX_PRESET.items()
+        }
 
         for key, position in filled_positions.items():
             self.captured_positions[key] = position
@@ -145,8 +171,27 @@ class AutoAlterationOrbApp:
                     text=f"{position[0]}, {position[1]}"
                 )
 
-        self.log("Auto-filled cluster currency positions from Transmutation anchor.")
-        self.show_capture_overlay(filled_positions)
+        self.log("Auto-filled cluster positions from currency stash box.")
+        overlay_positions = {
+            "box top-left": (left, top),
+            "box bottom-right": (right, bottom),
+            **filled_positions,
+        }
+        self.show_capture_overlay(overlay_positions)
+
+    def clear_cluster_selection(self):
+        self.currency_box.clear()
+
+        keys_to_clear = set(CURRENCY_BOX_PRESET)
+        keys_to_clear.update({"currency_box_top_left", "currency_box_bottom_right"})
+
+        for key in keys_to_clear:
+            self.captured_positions.pop(key, None)
+
+            if key in self.cluster_position_labels:
+                self.cluster_position_labels[key].config(text=self.tr("not_captured"))
+
+        self.log("Cleared cluster capture selection.")
 
     def show_capture_overlay(self, positions=None, duration_ms=6000):
         positions = positions or {
@@ -179,6 +224,21 @@ class AutoAlterationOrbApp:
             overlay.attributes("-transparentcolor", transparent_color)
         except tk.TclError:
             overlay.attributes("-alpha", 0.75)
+
+        if (
+            "box top-left" in positions
+            and "box bottom-right" in positions
+        ):
+            left, top = positions["box top-left"]
+            right, bottom = positions["box bottom-right"]
+            canvas.create_rectangle(
+                left,
+                top,
+                right,
+                bottom,
+                outline="#00ff66",
+                width=2,
+            )
 
         for label, (x, y) in positions.items():
             canvas.create_oval(
@@ -275,7 +335,7 @@ class AutoAlterationOrbApp:
 
         self.notebook = ttk.Notebook(top_frame)
         self.notebook.pack(side="left", anchor="n", fill="both", expand=False)
-        self.notebook.config(width=1240, height=680)
+        self.notebook.config(width=1240, height=760)
 
         self.item_tab = tk.Frame(self.notebook)
         self.map_tab = tk.Frame(self.notebook)
@@ -419,6 +479,13 @@ class AutoAlterationOrbApp:
             anchor="w",
         ).pack(anchor="w", pady=(4, 10))
 
+        self.stop_at_three_var = tk.BooleanVar(value=False)
+        self.make_checkbutton(
+            left_frame,
+            "stop_at_three_targets",
+            variable=self.stop_at_three_var,
+        ).pack(anchor="w", pady=(2, 10))
+
         position_frame = self.make_label_frame(right_frame, "screen_positions")
         position_frame.pack(anchor="w", fill="x", pady=(5, 0))
 
@@ -455,11 +522,30 @@ class AutoAlterationOrbApp:
                 command=lambda name=key, widget=value_label: self.capture_position(name, widget),
             ).grid(row=row_index, column=2, sticky="w", padx=6, pady=2)
 
+        box_row = len(position_fields)
         self.make_button(
             position_frame,
-            "auto_fill_currency_tab",
-            command=self.capture_currency_tab_anchor,
-        ).grid(row=len(position_fields), column=0, columnspan=3, sticky="w", padx=6, pady=(8, 2))
+            "currency_box_top_left",
+            command=lambda: self.capture_currency_box_corner("top_left"),
+        ).grid(row=box_row, column=0, sticky="w", padx=6, pady=(8, 2))
+
+        self.make_button(
+            position_frame,
+            "currency_box_bottom_right",
+            command=lambda: self.capture_currency_box_corner("bottom_right"),
+        ).grid(row=box_row, column=1, columnspan=2, sticky="w", padx=6, pady=(8, 2))
+
+        self.make_button(
+            position_frame,
+            "auto_fill_from_box",
+            command=self.auto_fill_from_currency_box,
+        ).grid(row=box_row + 1, column=0, columnspan=2, sticky="w", padx=6, pady=(2, 6))
+
+        self.make_button(
+            position_frame,
+            "clear_selection",
+            command=self.clear_cluster_selection,
+        ).grid(row=box_row + 1, column=2, sticky="w", padx=6, pady=(2, 6))
 
         utility_frame = tk.Frame(right_frame)
         utility_frame.pack(anchor="w", fill="x", pady=(6, 4))
@@ -478,7 +564,7 @@ class AutoAlterationOrbApp:
 
         self.make_label(
             right_frame,
-            "auto_fill_hint",
+            "currency_box_hint",
             anchor="w",
             justify="left",
             wraplength=440,
@@ -520,6 +606,14 @@ class AutoAlterationOrbApp:
         )
         self.extra_currency_radio.grid(row=0, column=3, sticky="w", padx=(0, 20), pady=8)
 
+        self.alch_scour_radio = self.make_radiobutton(
+            panel,
+            "alchemy_scouring",
+            variable=self.currency_mode_var,
+            value="alch_scour",
+        )
+        self.alch_scour_radio.grid(row=1, column=2, columnspan=2, sticky="w", padx=(0, 20), pady=(0, 8))
+
         self.shortcut_label = self.make_label(panel, "alternate_currency_input")
         self.shortcut_label.grid(row=0, column=4, sticky="e", padx=(0, 4), pady=8)
 
@@ -542,7 +636,7 @@ class AutoAlterationOrbApp:
         self.speed_slider.grid(row=0, column=7, sticky="w", padx=(0, 10), pady=8)
 
         self.make_label(panel, "hotkeys").grid(
-            row=1,
+            row=2,
             column=0,
             columnspan=8,
             sticky="w",
@@ -555,8 +649,12 @@ class AutoAlterationOrbApp:
 
         self.shortcut_label.grid()
         self.shortcut_entry.grid()
+        self.alch_scour_radio.grid_remove()
 
         if tab == 0:
+            if self.currency_mode_var.get() == "alch_scour":
+                self.currency_mode_var.set("single")
+
             self.single_currency_radio.config(text=self.tr("no_augment"))
             self.extra_currency_radio.config(text=self.tr("use_augment_orb"))
             self.shortcut_label.config(text=self.tr("alternate_currency_input"))
@@ -566,11 +664,16 @@ class AutoAlterationOrbApp:
         elif tab == 1:
             self.single_currency_radio.config(text=self.tr("chaos_orb"))
             self.extra_currency_radio.config(text=self.tr("chaos_exalt_once"))
+            self.alch_scour_radio.config(text=self.tr("alchemy_scouring"))
+            self.alch_scour_radio.grid()
             self.shortcut_label.config(text=self.tr("alternate_currency_input"))
             self.shortcut_entry.delete(0, tk.END)
             self.shortcut_entry.insert(0, "alt")
 
         else:
+            if self.currency_mode_var.get() == "alch_scour":
+                self.currency_mode_var.set("single")
+
             self.single_currency_radio.config(text=self.tr("alter_only"))
             self.extra_currency_radio.config(text=self.tr("use_augment_at_1"))
             self.shortcut_label.config(text=self.tr("augment_shortcut"))
@@ -603,6 +706,7 @@ class AutoAlterationOrbApp:
             "max_attempts": max_attempts,
             "speed": self.speed_var.get(),
             "use_extra_currency": self.currency_mode_var.get() == "extra",
+            "currency_mode": self.currency_mode_var.get(),
             "shortcut_key": self.shortcut_entry.get().strip().lower() or "alt",
         }
 
@@ -631,6 +735,7 @@ class AutoAlterationOrbApp:
             ]
             settings["is_fractured"] = self.fractured_var.get()
             settings["fractured_mod"] = self.fractured_entry.get()
+            settings["stop_at_three_targets"] = self.stop_at_three_var.get()
 
             for key in [
                 "alteration_key",
