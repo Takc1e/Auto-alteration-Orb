@@ -123,15 +123,15 @@ def parse_map_stats(text):
         ),
 
         "more_maps": extract_value(
-            r"(?:More Maps|更多地图|地圖增加):\s*\+(\d+)%", text
+            r"(?:More Maps|更多地图|更多地圖):\s*\+(\d+)%", text
         ),
 
         "currency": extract_value(
-            r"(?:More Currency|更多通货|通貨增加):\s*\+(\d+)%", text
+            r"(?:More Currency|更多通货|更多通貨):\s*\+(\d+)%", text
         ),
 
         "scarabs": extract_value(
-            r"(?:More Scarabs|更多圣甲虫|聖甲蟲增加):\s*\+(\d+)%", text
+            r"(?:More Scarabs|更多圣甲虫|更多聖甲蟲):\s*\+(\d+)%", text
         ),
 
         "divination": extract_value(
