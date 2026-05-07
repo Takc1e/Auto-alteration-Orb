@@ -452,7 +452,7 @@ class AutoAlterationOrbApp:
 
         self.make_label(
             left_frame,
-            "target_hint",
+            "cluster_target_warning",
             justify="left",
             anchor="w",
             wraplength=430,
@@ -537,15 +537,9 @@ class AutoAlterationOrbApp:
 
         self.make_button(
             position_frame,
-            "auto_fill_from_box",
-            command=self.auto_fill_from_currency_box,
-        ).grid(row=box_row + 1, column=0, columnspan=2, sticky="w", padx=6, pady=(2, 6))
-
-        self.make_button(
-            position_frame,
             "clear_selection",
             command=self.clear_cluster_selection,
-        ).grid(row=box_row + 1, column=2, sticky="w", padx=6, pady=(2, 6))
+        ).grid(row=box_row + 1, column=0, columnspan=3, sticky="w", padx=6, pady=(2, 6))
 
         utility_frame = tk.Frame(right_frame)
         utility_frame.pack(anchor="w", fill="x", pady=(6, 4))
